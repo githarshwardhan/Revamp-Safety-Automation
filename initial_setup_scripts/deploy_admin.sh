@@ -6,6 +6,7 @@ export GITTAG
 mkdir -p /opt/build/admin-build/safety-revamp-admin-build
 mkdir -p /opt/deploy/admin-deploy/safety-revamp-admin-deploy
 mkdir -p /opt/static-deployment
+mkdir -p /opt/azs
 
 #################
 
