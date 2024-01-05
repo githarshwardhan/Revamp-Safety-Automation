@@ -6,14 +6,13 @@ export GITTAG
 mkdir -p /opt/build/admin-build/safety-revamp-admin-build
 mkdir -p /opt/deploy/admin-deploy/safety-revamp-admin-deploy
 mkdir -p /opt/static-deployment
-mkdir -p /opt/azs
-
 #################
 
 cd /opt/build/admin-build/safety-revamp-admin-build/
-rm -r vsa-revamp-admin
 
-git clone -b $GITTAG https://aniketb:rXsbnGcJGpfbcqyDYxvT@gitlab.valueaddsofttech.com/safetyrevamp/vsa-revamp-admin.git
+git clone https://token:AhaQ2ovu_4AUe8d1MQPm@gitlab.valueaddsofttech.com/safetyrevamp/vsa-revamp-admin.git -b $GITTAG
+
+mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection idprooftypes --type json --file "vsa-revamp-admin/src/scripts/day0/idprooftypes.json"
 
 mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection entitlements --type json --file "vsa-revamp-admin/src/scripts/day0/entitlements.json"
 
@@ -33,17 +32,14 @@ mongoimport --db clientadmindb --host localhost --port 27017 --username safetyap
 
 mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection serviceareas --type json --file "vsa-revamp-admin/src/scripts/day0/serviceareas.json"
 
+mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection labourformfields --type json --file "vsa-revamp-admin/src/scripts/day0/labourformfields.json"
 
-mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection idprooftypes --type json --file "vsa-revamp-admin/src/scripts/day0/idprooftypes.json"
+mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection safetyactionabletypes --type json --file "vsa-revamp-admin/src/scripts/day0/safetyactionabletypes.json"
 
-mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection idprooftypes --type json --file "vsa-revamp-admin/src/scripts/day0/safetyactionabletypes.json"
-
-mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection idprooftypes --type json --file "vsa-revamp-admin/src/scripts/day0/labourformfields.json"
-
+mongoimport --db clientadmindb --host localhost --port 27017 --username safetyappadmin --password safetyapp2020 --collection safetyactionablecategories --type json --file "vsa-revamp-admin/src/scripts/day0/safetyactionablecategories.json"
 
 #####uploads folder for admin####
 cd /mnt
-
 mkdir -p admin_uploads/users/profile
 mkdir -p admin_uploads/inductiontraining/inductioncategorydocs
 mkdir -p admin_uploads/inductiontraining/idproofphotos
@@ -56,43 +52,35 @@ mkdir -p admin_uploads/workpermit/documents
 ####Admin Dockerfile######
 cd /opt/build/admin-build/safety-revamp-admin-build
 
-
 cat <<EOF > Dockerfile
-FROM ubuntu:20.04
 
+FROM ubuntu:20.04
+MAINTAINER anandd@valueaddsofttech.com
 RUN apt-get update
 RUN apt-get -y install curl gnupg
-
 # Create app directory
 WORKDIR /opt/
-
 # Install app dependencies
-
 COPY vsa-revamp-admin/ ./
-
 #open port
 EXPOSE 3030/tcp
-
-#RUN curl -sL https://deb.nodesource.com/setup_18.x | bash
-#RUN apt-get -y install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash
+RUN apt-get -y install nodejs
 RUN apt-get update
 RUN apt-get install -y apt-utils
 ENV NVM_DIR /usr/local/nvm
 RUN mkdir -p /usr/local/nvm
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 ENV NODE_VERSION v18.12.1
-RUN /bin/bash -c "source /usr/local/nvm/nvm.sh && nvm install v18.12.1 && nvm use --delete-prefix v18.12.1"
-
-
-ENV NODE_PATH /usr/local/nvm/versions/node/v18.12.1/lib/node_modules
-ENV PATH      /usr/local/nvm/versions/node/v18.12.1/bin:$PATH
-RUN npm i
+RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
+ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH
 CMD npm start
 
 EOF
 
 ######create docker image with Git tag############
-cd vsa-revamp-admin
+cd /opt/build/admin-build/safety-revamp-admin-build/vsa-revamp-admin
 
 GIT_TAG=$(cat version.txt | tr -d '\n')
 
@@ -106,10 +94,6 @@ else
     docker build -t admin:$GIT_TAG .
 fi
 
-
-
-
-
 cd /opt/deploy/admin-deploy/safety-revamp-admin-deploy
 
 ####Admin env variables######
@@ -117,21 +101,21 @@ cat <<'EOF' > env.sh
 
 #!/bin/bash
 export revampvsa_image=
-export VS_ADMIN_DB_URL="mongodb://safetyappadmin:safetyapp2020@192.168.20.101:27017/clientadmindb"
+export VS_ADMIN_DB_URL="mongodb://safetyappadmin:safetyapp2020@IP:27017/clientadmindb"
 export VS_ADMIN_PORT=3030
-export VS_AUTH_SECRET="LtWpmTC2+tCBPVSirWnzg25rLVc="
+export VS_AUTH_SECRET=""
 export VS_CLIENT_EMAIL_ACC=false
-export VS_EMAIL_ID=vcgsafetyapp@gmail.com
+export VS_EMAIL_ID=@gmail.com
 export VS_EMAIL_SERVICE_HOST=smtp.rediffmailpro.com
 export VS_EMAIL_SERVICE_PORT=587
 export VS_SECURE_CONNECTION=false
 export VS_SENDGRID_API_KEY=apikey
-export VS_EMAILPASSWORD="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"
-export VS_CLIENT_URL="http://192.168.20.101:3000"
-export VS_CLIENT="VCG Safety"
-export VS_CLIENT_HOST="http://192.168.20.101"
+export VS_EMAILPASSWORD=""
+export VS_CLIENT_URL="https://something.subdomain.com"
+export VS_CLIENT="VAST"
+export VS_CLIENT_HOST="https://something.subdomain.com"
 export VS_CLIENT_PORT=3000
-export VS_APP_NAME="VCG Safety"
+export VS_APP_NAME="add here"
 export VS_IOS_LINK="comming soon"
 export VS_ANDROID_LINK="comming soon"
 export VS_LOG_LEVEL="info"
@@ -140,9 +124,11 @@ export VS_REFRESH_TOKEN_EXPIRES_IN=180d
 export VS_REFRESH_TOKEN_TTL=15552000
 export VS_ACCESS_TOKEN_EXPIRES_IN=30d
 export DOCUMENT_EXPIRY_SCHEDULER_TIME=11:00
+export VS_TBT_WISE_LABOUR_REPORT_EMAIL_RECIPIENTS_LIST=support@constructionsafetyapp.com
+export VS_TBT_WISE_LABOUR_REPORT_SCHEDULER_TIME=12:00
 ########Firebase env Variable######
-export VS_PROXY_URL=http://192.168.20.101:4050
-export VS_FIREBASE_DB_URL=https://vcg-safety-5bf11.firebaseio.com
+export VS_PROXY_URL=https://something.subdomain.com
+export VS_FIREBASE_DB_URL=https://project_id.firebaseio.com
 export VS_FCM1='{
   "type": "service_account",
   "project_id": "vcg-safety-5bf11",
@@ -161,7 +147,6 @@ export VS_FCM2='{
 EOF
 
 sed -i "s/^export revampvsa_image=.*/export revampvsa_image=\"admin:$GIT_TAG\"/" /opt/deploy/admin-deploy/safety-revamp-admin-deploy/env.sh
-
 
 chmod +x env.sh
 source env.sh
@@ -206,6 +191,8 @@ services:
       - VS_REFRESH_TOKEN_TTL=${VS_REFRESH_TOKEN_TTL}
       - VS_ACCESS_TOKEN_EXPIRES_IN=${VS_ACCESS_TOKEN_EXPIRES_IN}
       - DOCUMENT_EXPIRY_SCHEDULER_TIME=${DOCUMENT_EXPIRY_SCHEDULER_TIME}
+      - VS_TBT_WISE_LABOUR_REPORT_EMAIL_RECIPIENTS_LIST=${VS_TBT_WISE_LABOUR_REPORT_EMAIL_RECIPIENTS_LIST}
+      - VS_TBT_WISE_LABOUR_REPORT_SCHEDULER_TIME=${VS_TBT_WISE_LABOUR_REPORT_SCHEDULER_TIME}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /mnt/admin_uploads:/opt/uploads
