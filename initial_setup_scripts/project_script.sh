@@ -71,6 +71,7 @@ mkdir -p $PROJECT_Directory_NAME/uploads/workpermits/signatures
 mkdir -p $PROJECT_Directory_NAME/uploads/workpermits/photos
 mkdir -p $PROJECT_Directory_NAME/uploads/debitnote/photos
 mkdir -p $PROJECT_Directory_NAME/uploads/debitnote/signatures
+mkdir -p $PROJECT_Directory_NAME/uploads/debitnote/reports
 mkdir -p $PROJECT_Directory_NAME/uploads/safetyreports
 
 
