@@ -53,17 +53,20 @@ mkdir -p admin_uploads/workpermit/documents
 cd /opt/build/admin-build/safety-revamp-admin-build
 
 cat <<EOF > Dockerfile
-
 FROM ubuntu:20.04
-MAINTAINER anandd@valueaddsofttech.com
 RUN apt-get update
 RUN apt-get -y install curl gnupg
+
 # Create app directory
 WORKDIR /opt/
+
 # Install app dependencies
+
 COPY vsa-revamp-admin/ ./
+
 #open port
 EXPOSE 3030/tcp
+
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash
 RUN apt-get -y install nodejs
 RUN apt-get update
@@ -76,7 +79,6 @@ RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use
 ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH
 CMD npm start
-
 EOF
 
 ######create docker image with Git tag############
