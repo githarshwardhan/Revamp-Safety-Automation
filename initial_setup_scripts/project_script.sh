@@ -1,22 +1,21 @@
 #!/bin/bash
 ######${DB_NAME} CREATION######
-mongosh --host localhost --port 27017 -u adminuser -p safetyapp2020 --authenticationDatabase admin <<EOF
+mongosh --host localhost --port 27017 -u adminuser -p safetyapp2024 --authenticationDatabase admin <<EOF
 use ${DB_NAME}
 db.createUser({user: "${DB_USER}",pwd: '${DB_PASSWD}', roles: [ { role: "dbOwner", db: "${DB_NAME}" } ]})
 
 EOF
 
-
 CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Run the MongoDB query and store the result in a variable
-RESULT=$(mongosh --host localhost --port 27017 -u adminuser -p safetyapp2020 --authenticationDatabase admin --quiet --eval "db.projects.find({ 'projectName': '$PROJECT_NAME' }).count()" $DB_NAME)
+RESULT=$(mongosh --host localhost --port 27017 -u adminuser -p safetyapp2024 --authenticationDatabase admin --quiet --eval "db.projects.find({ 'projectName': '$PROJECT_NAME' }).count()" $DB_NAME)
 
 # Check if the document count is greater than 0
 if [ "$RESULT" -gt 0 ]; then
   echo "Document exists in the collection."
 else
   echo "Document does not exist in the collection."
-  mongosh --host localhost --port 27017 -u adminuser -p safetyapp2020 --authenticationDatabase admin <<EOF
+  mongosh --host localhost --port 27017 -u adminuser -p safetyapp2024 --authenticationDatabase admin <<EOF
   use $DB_NAME
   db.projects.insert({"status":"Active","projectName":"${PROJECT_NAME}","projectCode":"${PROJECT_CODE}","zoneName":"${ZONE_NAME}","city":"${CITY}","contactNumber":"${CONTACT_NUMBER}","address":"${ADDRESS}","numberofBuildings":${NUMBER_OF_BUILDINGS},"createdAt":ISODate("${CURRENT_DATE}")
 })
@@ -26,14 +25,14 @@ fi
 
 ####################################################
 #Add project to safetyappadmin database
-CHECK=$(mongosh --host localhost --port 27017 -u adminuser -p safetyapp2020 --authenticationDatabase admin --quiet --eval "db.projects.find({ 'projectName': '$PROJECT_NAME' }).count()" clientadmindb)
+CHECK=$(mongosh --host localhost --port 27017 -u adminuser -p safetyapp2024 --authenticationDatabase admin --quiet --eval "db.projects.find({ 'projectName': '$PROJECT_NAME' }).count()" clientadmindb)
 
 # Check if the document count is greater than 0
 if [ "$CHECK" -gt 0 ]; then
   echo "Project exists in the clientadmindb"
 else
   echo "Project does not exists in the clientadmindb"
-  mongosh --host localhost --port 27017 -u adminuser -p safetyapp2020 --authenticationDatabase admin <<EOF
+  mongosh --host localhost --port 27017 -u adminuser -p safetyapp2024 --authenticationDatabase admin <<EOF
   use clientadmindb
   db.projects.insert({"projectCode": "${PROJECT_CODE}",projectName:"${PROJECT_NAME}"});
 EOF
@@ -44,7 +43,7 @@ mkdir -p /opt/build/project-build/safety-revamp-${PROJECT_Directory_NAME}-build
 cd /opt/build/project-build/safety-revamp-${PROJECT_Directory_NAME}-build
 
 rm -r vsa-revamp-project
-git clone -b ${GITTAG} https://aniketb:rXsbnGcJGpfbcqyDYxvT@gitlab.valueaddsofttech.com/safetyrevamp/vsa-revamp-project.git
+git clone -b ${GITTAG}  https://token:AhaQ2ovu_4AUe8d1MQPm@gitlab.valueaddsofttech.com/safetyrevamp/vsa-revamp-admin.git
 
 mongoimport --db ${DB_NAME} --host localhost --port 27017 --username ${DB_USER} --password ${DB_PASSWD} --collection configurationtypes --type json --file "vsa-revamp-project/src/scripts/day0/configurationtypes.json"
 
@@ -97,8 +96,8 @@ COPY vsa-revamp-project/ ./
 #open port
 EXPOSE 3031/tcp
 
-#RUN curl -sL https://deb.nodesource.com/setup_18.x | bash
-#RUN apt-get -y install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash
+RUN apt-get -y install nodejs
 RUN apt-get update
 RUN apt-get install -y apt-utils
 RUN apt-get install -y libglib2.0-0
@@ -115,7 +114,6 @@ RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use
 
 ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH
-RUN npm i
 CMD npm start
 
 EOF
@@ -126,8 +124,6 @@ GIT_TAG=$(cat version.txt | tr -d '\n')
 
 cd ..
 
-
-
 # Check if the Docker image exists
 if docker image inspect project:$GIT_TAG &> /dev/null; then
     echo "Docker image project:$GIT_TAG exists."
@@ -135,9 +131,6 @@ else
     echo "Docker image project:$GIT_TAG not exist. Building..."
     docker build -t project:$GIT_TAG .
 fi
-
-
-
 
 mkdir -p /opt/deploy/project-deploy/safety-revamp-${PROJECT_Directory_NAME}-deploy
 cd /opt/deploy/project-deploy/safety-revamp-${PROJECT_Directory_NAME}-deploy
