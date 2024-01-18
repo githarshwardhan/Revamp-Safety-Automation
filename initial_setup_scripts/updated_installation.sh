@@ -64,7 +64,7 @@ curl -fsSL https://pgp.mongodb.com/server-6.0.asc | \
 echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 
 # Update package list
-sudo apt-get update
+sudo apt-get update -y
 
 # Install MongoDB packages
 sudo apt-get install -y mongodb-org=6.0.10 mongodb-org-database=6.0.10 mongodb-org-server=6.0.10 mongodb-org-mongos=6.0.10 mongodb-org-tools=6.0.10
@@ -99,10 +99,9 @@ fi
 
 mongosh --host localhost --port 27017 <<EOF
 use admin
-db.createUser({ user: "adminuser", pwd: "safetyapp2020", roles: ["root"]})
+db.createUser({ user: "adminuser", pwd: " saFeTyaPp2o24 ", roles: ["root"]})
 
 EOF
-
 
 #Enable authentication in /etc/mongod.conf
 CONFIG_FILE="/etc/mongod.conf"
@@ -122,9 +121,9 @@ systemctl restart mongod
 sleep 3
 
 ########Mongodb db creation##################
-mongosh --host localhost --port 27017 -u adminuser -p safetyapp2020 --authenticationDatabase admin <<EOF
+mongosh --host localhost --port 27017 -u adminuser -p  saFeTyaPp2o24  --authenticationDatabase admin <<EOF
 use clientadmindb
-db.createUser({user: "safetyappadmin",pwd: 'safetyapp2020', roles: [ { role: "dbOwner", db: "clientadmindb" } ]})
+db.createUser({user: "safetyappadmin",pwd: ' saFeTyaPp2o24 ', roles: [ { role: "dbOwner", db: "clientadmindb" } ]})
      db.users.insert({
    "firstName":"Admin",
    "lastName":"User",
@@ -164,8 +163,14 @@ node -v
 npm -v
 
 
-
 ##########Nginx Installation#########
 
 apt install nginx -y
 sleep 5
+
+################ AWS Installation #####################
+
+sudo apt install awscli -y
+aws configure
+
+######################################################
